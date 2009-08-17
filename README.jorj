@@ -1,0 +1,25 @@
+intr
+Jorj Bauer <jorj@jorj.org>
+
+'intr' is a wrapper command. The concept comes from an app whose
+source is long since lost, written in the School of Engineering and
+Applied Science at the University of Pennsylvania. The original
+implementation was probably written by Chip Buchholtz.
+
+  Usage: intr <seconds> <command> [args]
+
+intr will spawn <command> with the given [args], and wait <seconds>
+seconds for the process to exit.
+
+If the process exits before that time, intr will return the result
+from the program as expected. But if the command does not exit in
+time, intr will attempt to kill the process using a variety of
+(increasingly drastic) signals. As a last-ditch effort, it will kill
+the process group.
+
+Any signals that are received by intr (with the exception of SIGCHLD)
+will be passed on to the child process.
+
+intr assumes that any program that exits before its 'kill time' is
+behaving as expected. This means that, for example, the process group
+is not killed under normal circumstances.
