@@ -1,9 +1,14 @@
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h> // new
+#endif
 #include <signal.h>
 
-extern const char *version;
 
 /* For the signal handler. Unfortunate that it's a global. */
 pid_t global_child_pid = -1; 
@@ -50,9 +55,15 @@ void do_parent(int delay, pid_t pgroup, pid_t child_pid)
   sleep(delay);
 
   for ( cur_sig=0; cur_sig<7; cur_sig++ ) {
+#if HAVE_DECL_SYS_SIGNAME
     fprintf( stderr, 
 	     "intr: sending child 'sig%s'\n", 
 	     sys_signame[signals[cur_sig]] );
+#else
+    fprintf( stderr, 
+	     "intr: sending child signal %d\n", 
+	     signals[cur_sig] );
+#endif
     /* Make sure the process is running, so we can kill it, and then do so. */
     kill( child_pid, SIGCONT );
     kill( child_pid, signals[cur_sig] );
@@ -80,7 +91,7 @@ int main(int argc, char *argv[])
 
   /* Error checking */
   if ( argc < 3 ) {
-    fprintf( stderr, "intr %s <jorj@jorj.org>\n", version );
+    fprintf( stderr, "intr %s <jorj@jorj.org>\n", PACKAGE_VERSION );
     fprintf( stderr, "Usage: %s <seconds> <command> [arguments]\n", argv[0] );
     exit( -2 );
   }
