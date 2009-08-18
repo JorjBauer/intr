@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(intr, 0.1-090817, jorj@jorj.org)
+AC_INIT(intr, 0.1-090818, jorj@jorj.org)
 AC_CONFIG_HEADER([config.h])
 
 # Check for programs we'll need in order to build and install...
