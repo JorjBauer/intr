@@ -3,12 +3,12 @@ ALL=intr
 CFLAGS=@CFLAGS@
 LDFLAGS=@LDFLAGS@
 
-SRC=intr.c version.c
+SRC=intr.c
 
 all:	intr
 
-intr:	intr.o version.o
-	${CC} ${CFLAGS} ${LDFLAGS} -o intr intr.o version.o
+intr:	intr.o config.h
+	${CC} ${CFLAGS} ${LDFLAGS} -o intr intr.o
 
 nointr:	nointr.o
 	${CC} ${CFLAGS} ${LDFLAGS} -o nointr nointr.o
@@ -20,5 +20,5 @@ clean:
 	rm -f *.o *~ intr nointr
 
 distclean: clean
-	rm -f config.log config.status config.cache Makefile version.c
+	rm -f config.log config.status config.cache Makefile config.h
 	rm -rf autom4te.cache
