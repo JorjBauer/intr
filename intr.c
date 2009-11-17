@@ -25,7 +25,7 @@ void child_handler(int signal_num)
   /* SIGCHLD is caught so we can terminate early (the child has finished). */
   if ( signal_num == SIGCHLD ) {
     pid = waitpid( WAIT_MYPGRP, &status, 0 );
-    exit( status );
+    exit( WEXITSTATUS(status) );
   }
 
   /* Any other signal should be forwarded to the child. */
@@ -74,6 +74,7 @@ void do_parent(int delay, pid_t pgroup, pid_t child_pid)
 	  "intr: unable to kill process. Attempting to kill the process "
 	  "group.\n");
   killpg( pgroup, SIGKILL );
+  exit(-99);
 }
 
 void do_child(char *argv[])
