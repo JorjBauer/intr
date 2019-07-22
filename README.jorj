@@ -15,7 +15,8 @@ If the process exits before that time, intr will return the result
 from the program as expected. But if the command does not exit in
 time, intr will attempt to kill the process using a variety of
 (increasingly drastic) signals. As a last-ditch effort, it will kill
-the process group.
+the process group. In either case, it returns a status code from intr 
+itself (128 for a normal kill, or 252 for killing the pgroup).
 
 Any signals that are received by intr (with the exception of SIGCHLD)
 will be passed on to the child process.

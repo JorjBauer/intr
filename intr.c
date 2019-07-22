@@ -12,6 +12,7 @@
 
 /* For the signal handler. Unfortunate that it's a global. */
 pid_t global_child_pid = -1; 
+int didkill = 0;
 
 void child_handler(int signal_num)
 {
@@ -20,12 +21,16 @@ void child_handler(int signal_num)
 
   signal( signal_num, child_handler ); /* ... yes, we want more of these! */
 
-  /* fprintf(stderr, "%s\n", sys_siglist[signal_num]); */
-
   /* SIGCHLD is caught so we can terminate early (the child has finished). */
   if ( signal_num == SIGCHLD ) {
     pid = waitpid( WAIT_MYPGRP, &status, 0 );
-    exit( WEXITSTATUS(status) );
+    /* If our sleep timer expired, then we'll exit with a status code
+     * indicative of that; otherwise, exit with the status code of the
+     * child */
+    if (didkill)
+      exit( 128 );
+    else
+      exit( WEXITSTATUS(status) );
   }
 
   /* Any other signal should be forwarded to the child. */
@@ -53,6 +58,7 @@ void do_parent(int delay, pid_t pgroup, pid_t child_pid)
   }
 
   sleep(delay);
+  didkill = 1;
 
   for ( cur_sig=0; cur_sig<7; cur_sig++ ) {
 #if HAVE_DECL_SYS_SIGNAME
@@ -74,7 +80,7 @@ void do_parent(int delay, pid_t pgroup, pid_t child_pid)
 	  "intr: unable to kill process. Attempting to kill the process "
 	  "group.\n");
   killpg( pgroup, SIGKILL );
-  exit(-99);
+  exit( 252 );
 }
 
 void do_child(char *argv[])
@@ -94,13 +100,13 @@ int main(int argc, char *argv[])
   if ( argc < 3 ) {
     fprintf( stderr, "intr %s <jorj@jorj.org>\n", PACKAGE_VERSION );
     fprintf( stderr, "Usage: %s <seconds> <command> [arguments]\n", argv[0] );
-    exit( -2 );
+    exit( 254 );
   }
 
   delay = atoi(argv[1]);
   if (delay <= 0) {
     fprintf( stderr, "intr: delay must be an integer > 0\n" );
-    exit( -3 );
+    exit( 253 );
   }
 
   /* Construct the argument list for the child process. */
@@ -117,7 +123,7 @@ int main(int argc, char *argv[])
   if ( (child_pid = fork()) == -1 ) {
     /* Error forking */
     perror( "Failed to fork" );
-    exit( -1 );
+    exit( 255 );
   } else if ( child_pid == 0 ) {
     /* Child process */
     do_child(args);
